@@ -131,6 +131,7 @@ window.showSection = function (sectionId) {
         'dashboard': 'Dashboard',
         'products': 'Product Catalog',
         'vendors': 'Vendor Management',
+        'stores': 'Stores & Users',
         'inventory': 'Stock Inventory',
         'pettycash': 'Petty Cash Log',
         'reports': 'Reports'
@@ -141,6 +142,7 @@ window.showSection = function (sectionId) {
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     // Simple way to match clicked nav (in real app add ID to nav items)
     // Here we just re-init views
+    if (sectionId === 'stores') renderStores();
     if (sectionId === 'products') renderProducts();
     if (sectionId === 'vendors') renderVendors();
     if (sectionId === 'inventory') renderInventory();
@@ -155,7 +157,52 @@ window.closeModal = function (id) {
     document.getElementById(id).classList.add('hidden');
 };
 
+function renderStores() {
+    const stores = db.getStores();
+    const users = db.getUsers();
+    const tbody = document.getElementById('stores-table');
+    tbody.innerHTML = '';
+
+    stores.forEach(s => {
+        // Find the manager user for this store
+        const manager = users.find(u => u.storeId === s.id && u.role === 'store_user');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight: 500;">${s.name}</td>
+            <td>${s.location}</td>
+            <td>${manager ? manager.username : '<span class="text-red">No Assigned Manager</span>'}</td>
+            <td class="text-muted">${manager ? manager.password : '-'}</td> <!-- Showing Pwd for Demo -->
+            <td>
+                <button class="btn btn-secondary" onclick="alert('Edit feature coming soon')">Edit</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
 // Forms
+document.getElementById('form-add-store').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    db.addStore(
+        {
+            name: formData.get('storeName'),
+            location: formData.get('location')
+        },
+        {
+            username: formData.get('username'),
+            password: formData.get('password')
+        }
+    );
+
+    alert('Store and User Created Successfully!');
+    closeModal('modal-add-store');
+    renderStores();
+    e.target.reset();
+});
+
 document.getElementById('form-add-product').addEventListener('submit', (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);

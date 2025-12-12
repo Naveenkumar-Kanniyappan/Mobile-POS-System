@@ -27,6 +27,9 @@
                 <a class="nav-link" onclick="showSection('products')">
                     <ion-icon name="phone-portrait-sharp"></ion-icon> Products
                 </a>
+                <a class="nav-link" onclick="showSection('stores')">
+                    <ion-icon name="storefront-outline"></ion-icon> Stores & Users
+                </a>
                 <a class="nav-link" onclick="showSection('inventory')">
                     <ion-icon name="file-tray-stacked-outline"></ion-icon> Inventory
                 </a>
@@ -118,6 +121,28 @@
                             </tr>
                         </thead>
                         <tbody id="products-table"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Stores Management Section -->
+            <section id="stores" class="content-section hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-muted">Manage Stores & Access Credentials</div>
+                    <button class="btn btn-primary" onclick="openModal('modal-add-store')">+ Add Store & User</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Store Name</th>
+                                <th>Location</th>
+                                <th>Manager Username</th>
+                                <th>Password</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stores-table"></tbody>
                     </table>
                 </div>
             </section>
@@ -296,6 +321,38 @@
                     <input type="text" name="description" value="Cash Allotment" required>
                 </div>
                 <button type="submit" class="btn btn-primary w-full">Allot Cash</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Store & User Modal -->
+    <div id="modal-add-store" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Store</h3>
+                <button class="close-modal" onclick="closeModal('modal-add-store')">&times;</button>
+            </div>
+            <form id="form-add-store">
+                <h4 style="margin-bottom: 1rem; color: var(--primary);">Store Details</h4>
+                <div class="form-group">
+                    <label>Store Name</label>
+                    <input type="text" name="storeName" placeholder="e.g. City Wireless" required>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" name="location" placeholder="e.g. West End" required>
+                </div>
+
+                <h4 style="margin-bottom: 1rem; color: var(--primary); margin-top: 1.5rem;">Manager Credentials</h4>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="text" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Create Store & User</button>
             </form>
         </div>
     </div>

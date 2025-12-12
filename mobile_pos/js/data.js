@@ -100,7 +100,7 @@ class DataStore {
     getUsers() { return this.data.users; }
     getVendors() { return this.data.vendors; }
     getProducts() { return this.data.products; }
-    
+
     // Inventory Logic
     getInventory(storeId) {
         return this.data.inventory.filter(i => i.storeId === storeId).map(inv => {
@@ -136,14 +136,14 @@ class DataStore {
         transaction.id = 't' + Date.now();
         transaction.date = new Date().toISOString().split('T')[0]; // Simple YYYY-MM-DD
         this.data.transactions.push(transaction);
-        
+
         // Auto update stock if it's a confirmed sale or approved purchase
         // NOTE: Req 3.3 says "Stock automatically increases" on Purchase Entry.
         // Req 3.4 says "Stock automatically decreases" on Sales Entry.
         if (transaction.type === 'SALE') {
             this.updateStock(transaction.storeId, transaction.productId, -transaction.quantity);
         } else if (transaction.type === 'PURCHASE') {
-             this.updateStock(transaction.storeId, transaction.productId, transaction.quantity);
+            this.updateStock(transaction.storeId, transaction.productId, transaction.quantity);
         }
         this.save();
     }
@@ -157,9 +157,9 @@ class DataStore {
             const product = this.data.products.find(p => p.id === t.productId);
             const store = this.data.stores.find(s => s.id === t.storeId);
             const vendor = t.vendorId ? this.data.vendors.find(v => v.id === t.vendorId) : null;
-            return { 
-                ...t, 
-                productName: product ? (product.brand + ' ' + product.model) : 'Unknown', 
+            return {
+                ...t,
+                productName: product ? (product.brand + ' ' + product.model) : 'Unknown',
                 storeName: store ? store.name : 'Unknown',
                 vendorName: vendor ? vendor.name : '-'
             };
@@ -178,23 +178,49 @@ class DataStore {
         let logs = this.data.pettyCash;
         if (storeId) logs = logs.filter(l => l.storeId === storeId);
         return logs.map(l => {
-             const store = this.data.stores.find(s => s.id === l.storeId);
-             return { ...l, storeName: store ? store.name : 'Unknown' };
+            const store = this.data.stores.find(s => s.id === l.storeId);
+            return { ...l, storeName: store ? store.name : 'Unknown' };
         }).reverse();
     }
-    
+
     // Admin: Add Master Product
     addProduct(product) {
         product.id = 'p' + Date.now();
         this.data.products.push(product);
         this.save();
     }
-    
+
     // Admin: Add Vendor
     addVendor(vendor) {
         vendor.id = 'v' + Date.now();
         this.data.vendors.push(vendor);
         this.save();
+    }
+
+    // Admin: Create Store & User
+    addStore(storeData, userData) {
+        // 1. Create Store
+        const storeId = 'store_' + Date.now();
+        const newStore = {
+            id: storeId,
+            name: storeData.name,
+            location: storeData.location
+        };
+        this.data.stores.push(newStore);
+
+        // 2. Create User linked to Store
+        const newUser = {
+            id: 'user_' + Date.now(),
+            username: userData.username,
+            password: userData.password,
+            role: 'store_user',
+            storeId: storeId,
+            name: storeData.name + ' Manager'
+        };
+        this.data.users.push(newUser);
+
+        this.save();
+        return { store: newStore, user: newUser };
     }
 
     // Simple Reports Helpers
