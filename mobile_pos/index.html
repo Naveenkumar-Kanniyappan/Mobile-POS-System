@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile POS | Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Ionicons for Icons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body class="login-page">
+
+    <div class="login-card">
+        <div style="margin-bottom: 2rem;">
+            <div style="width: 60px; height: 60px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <ion-icon name="phone-portrait-outline" style="font-size: 32px; color: white;"></ion-icon>
+            </div>
+            <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">Mobile POS System</h1>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">Sign in to manage your store</p>
+        </div>
+
+        <div id="loginAlert" class="mb-4 hidden" style="color: var(--danger); font-size: 0.875rem;"></div>
+
+        <form id="loginForm">
+            <div class="form-group" style="text-align: left;">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Enter username" required>
+            </div>
+            
+            <div class="form-group" style="text-align: left;">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full" style="padding: 0.75rem;">Sign In</button>
+        </form>
+
+        <div style="margin-top: 1.5rem; text-align: left; background: #f8fafc; padding: 1rem; border-radius: 8px; font-size: 0.75rem; color: #64748b;">
+            <strong>Demo Credentials:</strong><br>
+            Admin: admin / 123<br>
+            Univercell: univercell / 123<br>
+            AZ Store: azstore / 123
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script>
+        // Check if already logged in
+        const session = db.getCurrentUser();
+        if (session) {
+            if (session.role === 'admin') window.location.href = 'admin.html';
+            else window.location.href = 'store.html';
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        const loginAlert = document.getElementById('loginAlert');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            
+            const user = db.login(u, p);
+            
+            if (user) {
+                if (user.role === 'admin') window.location.href = 'admin.html';
+                else window.location.href = 'store.html';
+            } else {
+                loginAlert.textContent = 'Invalid username or password';
+                loginAlert.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

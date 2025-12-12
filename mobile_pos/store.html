@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store POS | Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" style="background: #0f172a;"> <!-- Slightly darker for Store -->
+            <div class="sidebar-header">
+                <ion-icon name="storefront-outline"></ion-icon>
+                <span id="store-name-label">Store Panel</span>
+            </div>
+
+            <nav>
+                <a class="nav-link active" onclick="showSection('dashboard')">
+                    <ion-icon name="grid-outline"></ion-icon> Dashboard
+                </a>
+                <a class="nav-link" onclick="showSection('pos')">
+                    <ion-icon name="cart-outline"></ion-icon> New Sale (POS)
+                </a>
+                <a class="nav-link" onclick="showSection('purchase')">
+                    <ion-icon name="bag-add-outline"></ion-icon> Purchase Entry
+                </a>
+                <a class="nav-link" onclick="showSection('stock')">
+                    <ion-icon name="cube-outline"></ion-icon> My Stock
+                </a>
+                <a class="nav-link" onclick="showSection('pettycash')">
+                    <ion-icon name="wallet-outline"></ion-icon> Petty Cash
+                </a>
+
+                <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                    <a class="nav-link" onclick="db.logout()" style="color: #f87171;">
+                        <ion-icon name="log-out-outline"></ion-icon> Logout
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <h2 class="page-title" id="page-title">Store Dashboard</h2>
+                <div class="user-profile">
+                    <span id="user-name-display" style="font-weight: 500;">User</span>
+                </div>
+            </header>
+
+            <!-- Dashboard -->
+            <section id="dashboard" class="content-section">
+                <div class="card-grid">
+                    <div class="card stat-card">
+                        <span class="stat-label">Today's Sales</span>
+                        <span class="stat-value" id="dash-sales-today">$0</span>
+                    </div>
+                    <div class="card stat-card">
+                        <span class="stat-label">Items in Stock</span>
+                        <span class="stat-value" id="dash-items">0</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Recent History</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-history-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- POS / Sales Entry -->
+            <section id="pos" class="content-section hidden">
+                <div class="card" style="max-width: 600px; margin: 0 auto;">
+                    <h3 class="mb-4">New Sale Entry</h3>
+                    <form id="form-sale">
+                        <div class="form-group">
+                            <label>Customer Type</label>
+                            <select name="customerType">
+                                <option value="Retail">Retail Customer</option>
+                                <option value="Wholesale">Wholesale</option>
+                                <option value="Distributor">Distributor</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Select Product</label>
+                            <select name="productId" id="pos-product-select" required>
+                                <!-- Populated JS -->
+                            </select>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <div class="form-group w-full">
+                                <label>Quantity</label>
+                                <input type="number" name="quantity" value="1" min="1" required>
+                            </div>
+                            <!-- Price is auto-fetched but editable usually? Req says "Sales Price". 
+                                 Usually POS autofills price. -->
+                            <div class="form-group w-full">
+                                <label>Sale Price (Per Unit)</label>
+                                <input type="number" name="price" id="pos-price-input" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-full" style="padding: 1rem; font-size: 1.1rem;">
+                            Complete Sale
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Purchase Entry -->
+            <section id="purchase" class="content-section hidden">
+                <div class="card" style="max-width: 600px; margin: 0 auto;">
+                    <h3 class="mb-4">Inward Purchase Entry</h3>
+                    <form id="form-purchase">
+                        <div class="form-group">
+                            <label>Vendor</label>
+                            <select name="vendorId" id="purchase-vendor-select" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Product</label>
+                            <select name="productId" id="purchase-product-select" required></select>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="form-group w-full">
+                                <label>Quantity</label>
+                                <input type="number" name="quantity" min="1" required>
+                            </div>
+                            <div class="form-group w-full">
+                                <label>Purchase Price</label> <!-- Should autofill but allow edit -->
+                                <input type="number" name="price" id="purchase-price-input" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-full"
+                            style="background-color: var(--success); color: white;">
+                            Add to Stock
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Stock View -->
+            <section id="stock" class="content-section hidden">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Specs</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-table"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Petty Cash -->
+            <section id="pettycash" class="content-section hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl">Petty Cash Log</h3>
+                    <button class="btn btn-danger" onclick="openModal('modal-add-expense')">- Add Expense</button>
+                </div>
+                <!-- Balance Display -->
+                <div class="card mb-4" style="background-color: #f1f5f9;">
+                    <div class="flex justify-between items-center">
+                        <span>Current Balance Available</span>
+                        <span class="text-2xl font-bold" id="petty-balance">$0</span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>By</th>
+                            </tr>
+                        </thead>
+                        <tbody id="petty-table"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Expense Modal -->
+    <div id="modal-add-expense" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Record Expense</h3>
+                <button class="close-modal" onclick="closeModal('modal-add-expense')">&times;</button>
+            </div>
+            <form id="form-add-expense">
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" name="amount" required>
+                </div>
+                <div class="form-group">
+                    <label>Reason / Description</label>
+                    <input type="text" name="description" required>
+                </div>
+                <button type="submit" class="btn btn-danger w-full">Record Expense</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/store.js"></script>
+</body>
+
+</html>

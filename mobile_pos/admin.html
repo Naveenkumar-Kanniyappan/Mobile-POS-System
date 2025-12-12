@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile POS | Admin Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
+                <span>Admin Panel</span>
+            </div>
+
+            <nav>
+                <a class="nav-link active" onclick="showSection('dashboard')">
+                    <ion-icon name="grid-outline"></ion-icon> Dashboard
+                </a>
+                <a class="nav-link" onclick="showSection('products')">
+                    <ion-icon name="phone-portrait-sharp"></ion-icon> Products
+                </a>
+                <a class="nav-link" onclick="showSection('inventory')">
+                    <ion-icon name="file-tray-stacked-outline"></ion-icon> Inventory
+                </a>
+                <a class="nav-link" onclick="showSection('vendors')">
+                    <ion-icon name="people-outline"></ion-icon> Vendors
+                </a>
+                <a class="nav-link" onclick="showSection('pettycash')">
+                    <ion-icon name="cash-outline"></ion-icon> Petty Cash
+                </a>
+                <a class="nav-link" onclick="showSection('reports')">
+                    <ion-icon name="bar-chart-outline"></ion-icon> Reports
+                </a>
+                <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                    <a class="nav-link" onclick="db.logout()" style="color: #f87171;">
+                        <ion-icon name="log-out-outline"></ion-icon> Logout
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <h2 class="page-title" id="page-title">Dashboard</h2>
+                <div class="user-profile">
+                    <span style="font-weight: 500;">Welcome, Admin</span>
+                    <div
+                        style="width: 35px; height: 35px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <ion-icon name="person"></ion-icon>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section">
+                <div class="card-grid">
+                    <div class="card stat-card">
+                        <span class="stat-label">Total Revenue</span>
+                        <span class="stat-value" id="dash-revenue">$0</span>
+                    </div>
+                    <div class="card stat-card">
+                        <span class="stat-label">Total Inventory Items</span>
+                        <span class="stat-value" id="dash-inventory">0</span>
+                    </div>
+                    <div class="card stat-card">
+                        <span class="stat-label">Stock Value</span>
+                        <span class="stat-value" id="dash-stock-value">$0</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; font-weight: 600;">Recent Transactions</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Store</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-recent-table">
+                                <!-- JS Populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Master Section -->
+            <section id="products" class="content-section hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-muted">Global Product Catalog Management</div>
+                    <button class="btn btn-primary" onclick="openModal('modal-add-product')">+ Add Product</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Brand</th>
+                                <th>Model</th>
+                                <th>Specs</th>
+                                <th>Purchase Price</th>
+                                <th>Sales Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Vendors Section -->
+            <section id="vendors" class="content-section hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-muted">Manage Suppliers</div>
+                    <button class="btn btn-primary" onclick="openModal('modal-add-vendor')">+ Add Vendor</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>GST</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendors-table"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Inventory View Section -->
+            <section id="inventory" class="content-section hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-muted">Current Stock Status (All Stores)</div>
+                    <!-- Store Filter could go here -->
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Store</th>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Petty Cash Section -->
+            <section id="pettycash" class="content-section hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-muted">Petty Cash Management</div>
+                    <button class="btn btn-primary" onclick="openModal('modal-add-petty')">+ Allot Cash</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Store</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Reason</th>
+                                <th>By</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pettycash-table"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Reports Section (Basic Placeholder) -->
+            <section id="reports" class="content-section hidden">
+                <div class="card">
+                    <h3>Generate Reports</h3>
+                    <p class="text-muted mb-4">Export detailed reports to PDF (Simulation)</p>
+
+                    <div class="flex gap-4">
+                        <button class="btn btn-secondary" onclick="alert('Generating Sales Report... Done!')">Sales
+                            Report</button>
+                        <button class="btn btn-secondary"
+                            onclick="alert('Generating Inventory Report... Done!')">Inventory Report</button>
+                        <button class="btn btn-secondary" onclick="alert('Generating P&L Report... Done!')">P&L
+                            Report</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Product Modal -->
+    <div id="modal-add-product" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Product</h3>
+                <button class="close-modal" onclick="closeModal('modal-add-product')">&times;</button>
+            </div>
+            <form id="form-add-product">
+                <div class="form-group">
+                    <label>Brand</label>
+                    <input type="text" name="brand" required>
+                </div>
+                <div class="form-group">
+                    <label>Model</label>
+                    <input type="text" name="model" required>
+                </div>
+                <div class="form-group">
+                    <label>Specifications</label>
+                    <input type="text" name="specs" placeholder="e.g. 8GB/128GB" required>
+                </div>
+                <div class="flex gap-4">
+                    <div class="form-group w-full">
+                        <label>Purchase Price</label>
+                        <input type="number" name="purchasePrice" required>
+                    </div>
+                    <div class="form-group w-full">
+                        <label>Sales Price</label>
+                        <input type="number" name="salesPrice" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Save Product</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Vendor Modal -->
+    <div id="modal-add-vendor" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Vendor</h3>
+                <button class="close-modal" onclick="closeModal('modal-add-vendor')">&times;</button>
+            </div>
+            <form id="form-add-vendor">
+                <div class="form-group">
+                    <label>Vendor Name</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="text" name="contact" required>
+                </div>
+                <div class="form-group">
+                    <label>GST Number</label>
+                    <input type="text" name="gst" required>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea name="address" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Save Vendor</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Allot Petty Cash Modal -->
+    <div id="modal-add-petty" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Allot Petty Cash</h3>
+                <button class="close-modal" onclick="closeModal('modal-add-petty')">&times;</button>
+            </div>
+            <form id="form-add-petty">
+                <div class="form-group">
+                    <label>Store</label>
+                    <select name="storeId" required>
+                        <option value="store_1">Univercell Market</option>
+                        <option value="store_2">AZ Store</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" name="amount" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" name="description" value="Cash Allotment" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Allot Cash</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>
